@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cyberpunk Manipulation Simulator</title>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Orbitron', sans-serif;
+}
+
+body{
+  background:black;
+  color:#00f7ff;
+  overflow-x:hidden;
+}
+
+canvas{
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:-1;
+}
+
+section{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:20px;
+}
+
+h1{
+  font-size:60px;
+  text-shadow:0 0 20px #00f7ff;
+}
+
+p{
+  max-width:700px;
+  margin-top:20px;
+  color:#ff00c8;
+}
+
+.glitch{
+  position:relative;
+  animation:glitch 1s infinite;
+}
+
+@keyframes glitch{
+  0%{text-shadow:2px 2px #ff00c8,-2px -2px #00f7ff;}
+  50%{text-shadow:-2px -2px #ff00c8,2px 2px #00f7ff;}
+  100%{text-shadow:2px 2px #ff00c8,-2px -2px #00f7ff;}
+}
+
+#game{
+  flex-direction:column;
+}
+
+.button{
+  margin-top:20px;
+  padding:12px 28px;
+  border:2px solid #00f7ff;
+  background:transparent;
+  color:#00f7ff;
+  cursor:pointer;
+  transition:0.3s;
+  letter-spacing:1px;
+}
+
+.button:hover{
+  background:#00f7ff;
+  color:black;
+  box-shadow:0 0 20px #00f7ff,0 0 40px #00f7ff;
+}
+
+.meter{
+  margin-top:20px;
+  width:320px;
+  height:22px;
+  border:2px solid #ff00c8;
+  box-shadow:0 0 10px #ff00c8;
+}
+
+.fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#ff00c8,#00f7ff);
+  transition:0.4s;
+}
+
+/* Floating neon particles */
+.particle{
+  position:fixed;
+  width:4px;
+  height:4px;
+  background:#00f7ff;
+  border-radius:50%;
+  opacity:0.7;
+  animation:floatUp linear infinite;
+}
+
+@keyframes floatUp{
+  from{transform:translateY(100vh);opacity:0;}
+  to{transform:translateY(-10vh);opacity:1;}
+}
+
+/* Ending screen */
+#ending{
+  position:fixed;
+  inset:0;
+  background:black;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  opacity:0;
+  pointer-events:none;
+  transition:1s;
+}
+
+#ending.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
+#ending h2{
+  font-size:50px;
+  color:#ff00c8;
+  text-shadow:0 0 25px #ff00c8;
+}
+
+</style>
+</head>
+<body>
+
+<section>
+  <div>
+    <h1 class="glitch">MANIPULATION</h1>
+    <p>In Neon City, power isn't money. It's influence.</p>
+  </div>
+</section>
+
+<section>
+  <div>
+    <h1>CONTROL</h1>
+    <p>Every decision shifts perception. Reality bends through narrative engineering.</p>
+  </div>
+</section>
+
+<section>
+  <div>
+    <h1>ILLUSION</h1>
+    <p>Truth is optional. Emotion is currency. Fear is leverage.</p>
+  </div>
+</section>
+
+<section id="game">
+  <h1>MANIPULATION SIMULATOR</h1>
+  <p>Increase Influence Level</p>
+  <button class="button" onclick="increaseInfluence()">Manipulate</button>
+
+  <div class="meter">
+    <div class="fill" id="fill"></div>
+  </div>
+
+  <p id="status"></p>
+</section>
+
+<div id="ending">
+  <h2>SYSTEM CONTROLLED</h2>
+  <p>The city now bends to your will.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+// 3D background
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+const renderer=new THREE.WebGLRenderer({alpha:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const geometry=new THREE.TorusKnotGeometry(10,3,100,16);
+const material=new THREE.MeshBasicMaterial({color:0x00f7ff,wireframe:true});
+const torus=new THREE.Mesh(geometry,material);
+scene.add(torus);
+
+camera.position.z=30;
+
+function animate(){
+  requestAnimationFrame(animate);
+  torus.rotation.x+=0.01;
+  torus.rotation.y+=0.01;
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+window.addEventListener('scroll',()=>{
+  const scrollY=window.scrollY;
+  torus.rotation.z=scrollY*0.002;
+});
+
+// Influence game
+let influence=0;
+
+function increaseInfluence(){
+  influence+=Math.floor(Math.random()*15)+5;
+  if(influence>100) influence=100;
+
+  document.getElementById('fill').style.width=influence+'%';
+
+  const status=document.getElementById('status');
+
+  if(influence<40){
+    status.innerText='Building Trust...';
+  }
+  else if(influence<80){
+    status.innerText='Emotional Control Achieved...';
+  }
+  else{
+    status.innerText='TOTAL DOMINANCE';
+    showEnding();
+  }
+}
+
+function showEnding(){
+  document.getElementById('ending').classList.add('show');
+}
+
+// Neon particle generator
+for(let i=0;i<40;i++){
+  const p=document.createElement('div');
+  p.className='particle';
+  p.style.left=Math.random()*100+'vw';
+  p.style.animationDuration=(5+Math.random()*10)+'s';
+  document.body.appendChild(p);
+}
+</script>
+
+</body>
+</html>
